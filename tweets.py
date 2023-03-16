@@ -1,22 +1,18 @@
 from datetime import datetime
-from multiprocessing import Pool
+from multiprocessing import Pool, set_start_method, get_context
 import os
 import pandas as pd
 from random import randint
 from scipy.special import softmax
 import snscrape.modules.twitter as sntwitter
+import sys
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 pd.set_option('max_colwidth', 150)
 
-# snscrape global vars
-word = "islam"
-month = "april"
-query = "islam religion -mma -ufc -makhachev (#islam OR #religion) lang:en until:2021-04-30 since:2021-04-01"
-
 tweets = []
-limit = 500
+limit = 1000
 
 # roberta global vars
 tweet_words = []
@@ -39,7 +35,7 @@ def run_roberta(tweet):
 
     # sentiment analysis
     encoded_tweet = tokenizer(tweet_proc, max_length=512,
-                              truncation=True, return_tensors='pt')
+            truncation=True, return_tensors='pt')
 
     # output = model(encoded_tweet['input_ids'], encoded_tweet['attention_mask'])
     output = model(**encoded_tweet)
@@ -85,6 +81,14 @@ def get_tweets(query):
 
 
 if __name__ == '__main__':
+    set_start_method("spawn")
+
+    # snscrape global vars
+    word = "islam"
+    month = sys.argv[1]
+
+    query = "islam religion -mma -ufc -makhachev (#islam OR #religion) lang:en until:2021-{}-28 since:2021-{}-01".format(month, month)
+
     # now = datetime.now()
     # islam
     get_tweets(query)
@@ -95,12 +99,15 @@ if __name__ == '__main__':
     # women in islam/muslim women
 
     # parallel worker pool
-    with Pool(8) as pool:
+    with get_context("spawn").Pool(4) as pool:
         results = pool.map(run_roberta, df['Tweet'].to_numpy())
     pool.close()
 
     outfile_name = "{}.{}.{}.out".format(word, month, randint(0, 100000))
     os.system("touch {}".format(outfile_name))
+    os.system("touch neg.{}".format(outfile_name))
+    os.system("touch neu.{}".format(outfile_name))
+    os.system("touch pos.{}".format(outfile_name))
 
     with open(outfile_name, "w") as outfile:
         outfile.write("(QUERY): '{}' '{}'\n".format(word.upper(), month))
@@ -109,4 +116,17 @@ if __name__ == '__main__':
         for result in results:
             for item in result:
                 outfile.write("{} ".format(item))
+            outfile.write("\n")
+
+    with open("neg.{}".format(outfile_name), "w") as outfile:
+        for result in results:
+            outfile.write(str(result[0]))
+            outfile.write("\n")
+    with open("neu.{}".format(outfile_name), "w") as outfile:
+        for result in results:
+            outfile.write(str(result[1]))
+            outfile.write("\n")
+    with open("pos.{}".format(outfile_name), "w") as outfile:
+        for result in results:
+            outfile.write(str(result[2]))
             outfile.write("\n")
