@@ -12,7 +12,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 pd.set_option('max_colwidth', 150)
 
 tweets = []
-limit = 1000
+limit = 50
 
 # roberta global vars
 tweet_words = []
@@ -103,11 +103,15 @@ if __name__ == '__main__':
         results = pool.map(run_roberta, df['Tweet'].to_numpy())
     pool.close()
 
-    outfile_name = "{}.{}.{}.out".format(word, month, randint(0, 100000))
-    os.system("touch {}".format(outfile_name))
-    os.system("touch neg.{}".format(outfile_name))
-    os.system("touch neu.{}".format(outfile_name))
-    os.system("touch pos.{}".format(outfile_name))
+    name_id = "{}.{}.{}".format(word, month, randint(0, 100000))
+
+    outfile_name = f"out/{name_id}/{name_id}.out"
+
+    os.system(f"mkdir out/{name_id}")
+    os.system(f"touch out/{name_id}/{name_id}.out")
+    os.system("touch out/{name_id}/neg.{}".format(outfile_name))
+    os.system("touch out/{name_id}/neu.{}".format(outfile_name))
+    os.system("touch out/{name_id}/pos.{}".format(outfile_name))
 
     with open(outfile_name, "w") as outfile:
         outfile.write("(QUERY): '{}' '{}'\n".format(word.upper(), month))
