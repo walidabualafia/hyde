@@ -1,6 +1,6 @@
-import os
+import os, sys
 
-word = 'islam'
+word = sys.argv[1]
 
 # define function to read in numbers from a file and return their average
 def average_numbers(file_path):
@@ -29,8 +29,9 @@ for file in text_files:
     avg = average_numbers(file)
     averages.append(avg)
 
+filename = f'{word}.averages.txt'
 # write the averages to a new file
-with open('averages.txt', 'w') as file:
+with open(filename, 'w') as file:
     for i in range(len(averages)):
         if text_files[i].find('positive') != -1:
             file.write(text_files[i][text_files[i].index('positive'):] + '\n' + str(averages[i]) + '\n\n')
@@ -39,7 +40,7 @@ with open('averages.txt', 'w') as file:
         elif text_files[i].find('negative') != -1:
             file.write(text_files[i][text_files[i].index('negative'):] + '\n' + str(averages[i]) + '\n\n')
 
-print("Averages written to averages.txt")
+print(f"Averages written to {word}.averages.txt")
 print(f'../out/{word}')
 print(get_text_files(f'../out/{word}'))
 
