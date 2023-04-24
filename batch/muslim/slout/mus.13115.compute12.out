@@ -1,0 +1,5 @@
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** STEP 13115.0 ON compute12 CANCELLED AT 2023-03-26T23:14:02 ***
+srun: got SIGCONT
+slurmstepd: error: *** JOB 13115 ON compute12 CANCELLED AT 2023-03-26T23:14:02 ***
+srun: forcing job termination
